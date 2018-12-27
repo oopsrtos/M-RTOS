@@ -18,5 +18,9 @@ void M_RTOS_TaskCreate (m_rtos_tcb *p_tcb,
 void m_rtos_delay(m_rtos_u32 tick);
 void M_RTOS_SemaphoreInit(m_rtos_semaphore *semaphore,m_rtos_u8 semaphore_type);
 m_rtos_u8 M_RTOS_SemaphorePend(m_rtos_semaphore *semaphore,m_rtos_u32 wait_time);
-m_rtos_u8 M_RTOS_SemaphorePost(m_rtos_semaphore *semaphore);							 
+m_rtos_u8 M_RTOS_SemaphorePost(m_rtos_semaphore *semaphore);
+
+void m_rtos_heap_buffer_init(void);
+void* m_rtos_malloc(uint32_t size);
+void m_rtos_free(void* address);
 #endif

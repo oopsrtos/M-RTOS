@@ -3,7 +3,7 @@
 #undef M_RTOS_GLOBALS
 
 /***************************************************************************************************
-																			m_rtos idle task
+						m_rtos idle task
 ***************************************************************************************************/
 #define IDLE_STACK_SIZE	128
 #define IDLE_TASK_PRIORITY	0xffffffff
@@ -38,7 +38,7 @@ void m_rtos_idle_init( void *p_arg )
 								(m_rtos_u32)						IDLE_TASK_PRIORITY);
 }
 /***************************************************************************************************
-																			m_rtos ready task list
+    					m_rtos ready task list
 ***************************************************************************************************/
 /**
  * @brief  任务列表添加节点
@@ -48,7 +48,7 @@ void m_rtos_idle_init( void *p_arg )
  */
 void M_RTOS_InsertNodeTaskList(m_rtos_tcb *p_tcb,m_rtos_task_list **task_list)
 {
-	m_rtos_task_list *task_prt_new = (m_rtos_task_list*)malloc(sizeof(m_rtos_task_list));
+	m_rtos_task_list *task_prt_new = (m_rtos_task_list*)m_rtos_malloc(sizeof(m_rtos_task_list));
 	/*这里需要添加内存获取失败的处理*/
 	
 	if(NULL == (*task_list)){
@@ -79,7 +79,7 @@ void M_RTOS_DeleteNodeTaskList(m_rtos_tcb *p_tcb,m_rtos_task_list **task_list)
 		for (;del_node != (*task_list)->NextNode;del_node = (*task_list)->NextNode){
 			if (((del_node->TaskPtr) == p_tcb) && (del_node->TaskPtr->Priority != IDLE_TASK_PRIORITY)){
 				(*task_list)->NextNode = del_node->NextNode;
-				free(del_node);
+				m_rtos_free(del_node);
 				break;
 			}
 		}
@@ -320,7 +320,9 @@ void m_rtos_pend_list_deal()
 void m_rtos_init(void)
 {
 	m_rtos_set_interrupt_stop();
-	
+
+    m_rtos_heap_buffer_init();
+
 	m_rtos_idle_init(NULL);/*空闲任务初始化*/
 	
 	M_RTOS_CurPtr = (m_rtos_tcb *)0;
@@ -343,24 +345,24 @@ m_rtos_u32 *M_RTOS_TaskStackInit (M_RTOS_TASK_PTR  p_task,
 	m_rtos_u32  *p_stk;
 
 	p_stk = &p_stk_base[stk_size];
-															/* 异常发生时自动保存的寄存器                              */
-	*--p_stk = (m_rtos_u32)0x01000000u;                        /* xPSR的bit24必须置1                                     */
-	*--p_stk = (m_rtos_u32)p_task;                             /* 任务的入口地址                                         */
-	*--p_stk = (m_rtos_u32)0x14141414u;                        /* R14 (LR)                                               */
-	*--p_stk = (m_rtos_u32)0x12121212u;                        /* R12                                                    */
-	*--p_stk = (m_rtos_u32)0x03030303u;                        /* R3                                                     */
-	*--p_stk = (m_rtos_u32)0x02020202u;                        /* R2                                                     */
-	*--p_stk = (m_rtos_u32)0x01010101u;                        /* R1                                                     */
-	*--p_stk = (m_rtos_u32)p_arg;                              /* R0 : 任务形参                                          */
-															/* 异常发生时需手动保存的寄存器                            */
-	*--p_stk = (m_rtos_u32)0x11111111u;                        /* R11                                                    */
-	*--p_stk = (m_rtos_u32)0x10101010u;                        /* R10                                                    */
-	*--p_stk = (m_rtos_u32)0x09090909u;                        /* R9                                                     */
-	*--p_stk = (m_rtos_u32)0x08080808u;                        /* R8                                                     */
-	*--p_stk = (m_rtos_u32)0x07070707u;                        /* R7                                                     */
-	*--p_stk = (m_rtos_u32)0x06060606u;                        /* R6                                                     */
-	*--p_stk = (m_rtos_u32)0x05050505u;                        /* R5                                                     */
-	*--p_stk = (m_rtos_u32)0x04040404u;                        /* R4                                                     */
+													  /* 异常发生时自动保存的寄存器                              */
+	*--p_stk = (m_rtos_u32)0x01000000u;               /* xPSR的bit24必须置1                                     */
+	*--p_stk = (m_rtos_u32)p_task;                    /* 任务的入口地址                                         */
+	*--p_stk = (m_rtos_u32)0u;                        /* R14 (LR)                                               */
+	*--p_stk = (m_rtos_u32)0u;                        /* R12                                                    */
+	*--p_stk = (m_rtos_u32)0u;                        /* R3                                                     */
+	*--p_stk = (m_rtos_u32)0u;                        /* R2                                                     */
+	*--p_stk = (m_rtos_u32)0u;                        /* R1                                                     */
+	*--p_stk = (m_rtos_u32)p_arg;                     /* R0 : 任务形参                                          */
+													  /* 异常发生时需手动保存的寄存器                            */
+	*--p_stk = (m_rtos_u32)0u;                        /* R11                                                    */
+	*--p_stk = (m_rtos_u32)0u;                        /* R10                                                    */
+	*--p_stk = (m_rtos_u32)0u;                        /* R9                                                     */
+	*--p_stk = (m_rtos_u32)0u;                        /* R8                                                     */
+	*--p_stk = (m_rtos_u32)0u;                        /* R7                                                     */
+	*--p_stk = (m_rtos_u32)0u;                        /* R6                                                     */
+	*--p_stk = (m_rtos_u32)0u;                        /* R5                                                     */
+	*--p_stk = (m_rtos_u32)0u;                        /* R4                                                     */
 	return (p_stk);
 }
 /**
@@ -407,8 +409,8 @@ void SysTick_Handler(void)
 	m_rtos_sched();
 }
 /***************************************************************************************************
-																			semaphore 
-	*	1、只考虑了单个互斥信号量的情况，如果任务持有多个锁就完蛋了，系统直接挂掉
+    semaphore
+	* 1、只考虑了单个互斥信号量的情况，如果任务持有多个锁就完蛋了，系统直接挂掉
 	* 2、消息队列没有写
 ***************************************************************************************************/
 /**
@@ -471,8 +473,8 @@ m_rtos_u8 M_RTOS_SemaphorePend(m_rtos_semaphore *semaphore,m_rtos_u32 wait_time)
 }
 /**
   * @brief  semaphore post
-	* @param  semaphore:信号量指针
-	* @param  return MUTEX_GET_FILE 获取失败 MUTEX_GET_SUCCESS 获取成功
+  * @param  semaphore:信号量指针
+  * @param  return MUTEX_GET_FILE 获取失败 MUTEX_GET_SUCCESS 获取成功
   * @author ma57457@163.com
   * @date 2018-7-14
   */
@@ -502,7 +504,4 @@ m_rtos_u8 M_RTOS_SemaphorePost(m_rtos_semaphore *semaphore)
 	return ret;
 }
 /***************************************************************************************************
-																			memory manage
-	*	1、第二版加入，没有搞清楚怎么解决碎片问题，当前先用编译器提供的凑合一下
 ***************************************************************************************************/
-
