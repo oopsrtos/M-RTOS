@@ -4,7 +4,7 @@
  * @brief  task stack initialize
  * @param  none
  * @author ma57457@163.com
- * @date 2019.10.18
+ * @date 2019.11.14
  */
 m_rtos_u32 *M_RTOS_TaskStackInit (M_RTOS_TASK_PTR  p_task,
                         void         *p_arg,
